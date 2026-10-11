@@ -18,6 +18,17 @@ SiYuan browser extension for Chrome.
 2. On a web page, select the content you want to clip, then choose "Copy to SiYuan" from the context menu
 3. Paste in SiYuan
 
+### 🔐 Cloudflare Access (fork patch)
+
+If SiYuan sits behind Cloudflare Access, fill **CF-Access-Client-Id** and **CF-Access-Client-Secret** (service token) in the extension options. Both headers are sent on every kernel request only when both fields are set; leave them empty for normal use.
+
+Patch surface (search `Fork patch: CF Access` when rebasing onto a new upstream release):
+
+* `lib/siyuan-api.js`: `siyuanAuthHeaders(token)`, used by `siyuanKernelFetch`
+* `background.js`: `netImg2LocalAssets` and `/api/extension/copy` fetches use `siyuanAuthHeaders`
+* `popup.js`: two inputs after API token, plus `bindPasswordToggle`
+* `lib/siyuan-storage-defaults.js`, `_locales/en/messages.json`, `tests/cf-access-headers.test.js`
+
 ### ⌨️ Keyboard Shortcuts
 
 The extension supports the following keyboard shortcuts:

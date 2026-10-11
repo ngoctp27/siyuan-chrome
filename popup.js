@@ -71,6 +71,15 @@ function passwordFieldHtml(labelKey, { inputId, toggleId }) {
     </div>`;
 }
 
+// Fork patch: CF Access — shared show/hide toggle for token and CF secret
+function bindPasswordToggle(input, toggle) {
+    toggle.addEventListener("click", () => {
+        const hidden = input.type === "password";
+        input.type = hidden ? "text" : "password";
+        toggle.innerHTML = svgIcon(hidden ? "iconEyeoff" : "iconEye", "popup__icon");
+    });
+}
+
 function actionRowHtml(labelKey, buttonId, buttonContent) {
     return `<div class="popup__row">
         <span class="popup__row-label u-text-body u-selectable">${t(labelKey)}</span>
@@ -594,24 +603,28 @@ function renderPopup(items) {
     const token = connSection.querySelector("#token");
     const tokenToggle = connSection.querySelector("#tokenToggle");
     token.value = items.token || "";
-    bindSyncInput(token, "token", {
-        onSaved: () => {
-            notebookCache = [];
-            syncSendBlockFromLocal();
-            void updateNotebookList({ quiet: true });
-            void updateSavePathPreview();
-            refreshSelectedDatabase();
-        },
-    });
-    tokenToggle.addEventListener("click", () => {
-        if (token.type === "password") {
-            token.type = "text";
-            tokenToggle.innerHTML = svgIcon("iconEyeoff", "popup__icon");
-        } else {
-            token.type = "password";
-            tokenToggle.innerHTML = svgIcon("iconEye", "popup__icon");
-        }
-    });
+    const onConnectionSaved = () => {
+        notebookCache = [];
+        syncSendBlockFromLocal();
+        void updateNotebookList({ quiet: true });
+        void updateSavePathPreview();
+        refreshSelectedDatabase();
+    };
+    bindSyncInput(token, "token", { onSaved: onConnectionSaved });
+    bindPasswordToggle(token, tokenToggle);
+
+    // Fork patch: CF Access — Cloudflare Access service token (optional)
+    connSection.insertAdjacentHTML(
+        "beforeend",
+        fieldHtml("cf_access_client_id", `<input class="popup__input u-surface" id="cfAccessClientId" autocomplete="off">`) +
+            passwordFieldHtml("cf_access_client_secret", { inputId: "cfAccessClientSecret", toggleId: "cfAccessClientSecretToggle" }),
+    );
+    for (const key of ["cfAccessClientId", "cfAccessClientSecret"]) {
+        const input = connSection.querySelector("#" + key);
+        input.value = items[key] || "";
+        bindSyncInput(input, key, { normalize: (v) => v.trim(), onSaved: onConnectionSaved });
+    }
+    bindPasswordToggle(connSection.querySelector("#cfAccessClientSecret"), connSection.querySelector("#cfAccessClientSecretToggle"));
 
     scroll.insertAdjacentHTML("beforeend", `<section class="popup__section popup__section--divided"></section>`);
     const settingsSection = scroll.lastElementChild;
