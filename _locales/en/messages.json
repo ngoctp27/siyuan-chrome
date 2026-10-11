@@ -17,6 +17,12 @@
   "api_token": {
     "message": "API token"
   },
+  "cf_access_client_id": {
+    "message": "CF-Access-Client-Id (optional)"
+  },
+  "cf_access_client_secret": {
+    "message": "CF-Access-Client-Secret (optional)"
+  },
   "save_path": {
     "message": "Save path"
   },

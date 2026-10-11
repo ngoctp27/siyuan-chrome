@@ -428,7 +428,7 @@ async function handleArticleClip(requestData, apiBase, copyData, fetchFileErr) {
         // 可能因为跨域问题导致下载图片失败，这里调用内核接口 `网络图片转换为本地图片` https://github.com/siyuan-note/siyuan/issues/7224
         void fetch(apiBase + "/api/format/netImg2LocalAssets", {
             method: "POST",
-            headers: { Authorization: "Token " + requestData.token },
+            headers: await siyuanAuthHeaders(requestData.token), // Fork patch: CF Access
             body: JSON.stringify({
                 id: docId,
                 url: requestData.href, // 改进浏览器剪藏扩展转换本地图片成功率 https://github.com/siyuan-note/siyuan/issues/7464
@@ -459,7 +459,7 @@ async function handleUploadCopy(requestData) {
     try {
         const copyHttpResponse = await fetch(apiBase + "/api/extension/copy", {
             method: "POST",
-            headers: { Authorization: "Token " + requestData.token },
+            headers: await siyuanAuthHeaders(requestData.token), // Fork patch: CF Access
             body: formData,
         });
 
